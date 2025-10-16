@@ -10,7 +10,7 @@ namespace JeuDeCombat
         string classeJ1;
         string classeJ2;
         bool isClassChoose = false;
-        List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
+        List<string> actions = new List<string> { "Attaquer", "DÃ©fendre", "Action SpÃ©" };
         List<string> difficulte = new List<string>() { "1", "2", "3", "4"};
         int difficultyChoose;
         int manche = 0;
@@ -46,7 +46,7 @@ namespace JeuDeCombat
             Valider.Location = new Point(350, 400);
             
         }
-        //Faire apparaitre les différents boutons de choix
+        //Faire apparaitre les diffÃ©rents boutons de choix
         private void PutButton(List<string> ListOfText, EventHandler actionToDo)
         {
             for (int i = 0; i < ListOfText.Count; i++)
@@ -62,22 +62,22 @@ namespace JeuDeCombat
         private void ChooseDifficulty(object sender, EventArgs e)
         {
             choiceButtons.Controls.Clear();
-            choiceButtons.Text = "Difficulté";
-            textClass.Text = "Choisissez une difficulté";
+            choiceButtons.Text = "DifficultÃ©";
+            textClass.Text = "Choisissez une difficultÃ©";
             Valider.Click -= new EventHandler(ChooseDifficulty);
             Valider.Click += new EventHandler(LaunchBattle);
             PutButton(difficulte, difficultyToChoose);
             
         }
-        //Permet de sélectionner une difficulté via les boutons
+        //Permet de sÃ©lectionner une difficultÃ© via les boutons
         private void difficultyToChoose(object sender, EventArgs e)
         {
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
+            textClass.Text = "Vous avez choisi la difficultÃ© " + buttonTook;
             difficultyChoose = int.Parse(buttonTook);
         }
-        //Permet de sélectionner une classe via les boutons
+        //Permet de sÃ©lectionner une classe via les boutons
         private void buttonChoose(object sender, EventArgs e)
         {
             RadioButton classr = (RadioButton)sender;
@@ -87,7 +87,7 @@ namespace JeuDeCombat
             if (!isClassChoose) isClassChoose = true;
         }
 
-        //Gère le lancement du combat
+        //GÃ¨re le lancement du combat
         private void LaunchBattle(object sender, EventArgs e)
         {
             textClass.Text = "Le combat commence";
@@ -120,11 +120,11 @@ namespace JeuDeCombat
 
         }
 
-        //Gère la création et la mise à jour des stats
+        //GÃ¨re la crÃ©ation et la mise Ã  jour des stats
         private void Stats(GroupBox StatsBox, int pv, string classPlayer, string lastAction)
         {
             StatsBox.Controls.Clear();
-            List<string> statsList = new List<string> { "PV : ", "Classe : ", "Dernière action : ", lastAction };
+            List<string> statsList = new List<string> { "PV : ", "Classe : ", "DerniÃ¨re action : ", lastAction };
             List<string> statsString = new List<string>() { pv.ToString(), classPlayer, "", "" };
             
             for (int i = 0; i < statsList.Count; i++)
@@ -136,7 +136,7 @@ namespace JeuDeCombat
             }
             StatsBox.Show();
         }
-        //Permet la création et le choix des boutons d'attaques
+        //Permet la crÃ©ation et le choix des boutons d'attaques
         private void actionChoose(object sender, EventArgs e)
         {
             RadioButton classr = (RadioButton)sender;
@@ -145,7 +145,7 @@ namespace JeuDeCombat
             actionsJ1 = buttonTook;
         }
 
-        //Gère le combat
+        //GÃ¨re le combat
         private void InGame()
         {
             manche++;
@@ -165,11 +165,11 @@ namespace JeuDeCombat
                     {// attack when weak, protect when strong (k that dumb)
                         bool willSpecial = random.Next(1, 4) == 4;
                         if (willSpecial)
-                            actionsJ2 = "Action Spé";
+                            actionsJ2 = "Action SpÃ©";
                         else if (PvJoueur < PvOrdi)
                             actionsJ2 = "Attaquer";
                         else
-                            actionsJ2 = "Défendre";
+                            actionsJ2 = "DÃ©fendre";
                     }
                     break;
                 case 2:
@@ -181,11 +181,11 @@ namespace JeuDeCombat
                     {// protect when weak, attack when strong
                         bool willSpecial = random.Next(1, 4) == 4;
                         if (willSpecial)
-                            actionsJ2 = "Action Spé";
+                            actionsJ2 = "Action SpÃ©";
                         else if (PvJoueur > PvOrdi)
                             actionsJ2 = "Attaquer";
                         else
-                            actionsJ2 = "Défendre";
+                            actionsJ2 = "DÃ©fendre";
                     }
                     break;
                 case 4:
@@ -199,11 +199,11 @@ namespace JeuDeCombat
                         probaSpecialPercent += (int)Math.Round((ratioOrdi - ratioJoueur) * 100);
 
                         if (random.Next(100) < probaSpecialPercent)
-                            actionsJ2 = "Attaque Spé";
+                            actionsJ2 = "Attaque SpÃ©";
                         else if (random.Next(100) < probaAttackPercent)
                             actionsJ2 = "Attaquer";
                         else
-                            actionsJ2 = "Défendre";
+                            actionsJ2 = "DÃ©fendre";
                     }
                     break;
                 default:
@@ -215,14 +215,14 @@ namespace JeuDeCombat
             bool rageJ = false;
             bool rageO = false;
             //Verification Rage
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Tank") rageJ = true;
-            if (actionsJ2 == "Action Spé" && classeJ2 == "Tank") rageO = true;
+            if (actionsJ1 == "Action SpÃ©" && classeJ1 == "Tank") rageJ = true;
+            if (actionsJ2 == "Action SpÃ©" && classeJ2 == "Tank") rageO = true;
             //Joueur
-            //Spécial Tank
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Tank")
+            //SpÃ©cial Tank
+            if (actionsJ1 == "Action SpÃ©" && classeJ1 == "Tank")
             {
                 PvJoueur--;
-                if (actionsJ2 != "Défendre")
+                if (actionsJ2 != "DÃ©fendre")
                 {
                     PvOrdi -= 2;
                     if (rageO)
@@ -230,31 +230,43 @@ namespace JeuDeCombat
                         PvJoueur -= 2;
                     }
                 }
+                else
+                {
+                    PvOrdi -= 1;
+                }
             }
-            //Spécial Healer
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Healer")
+            //SpÃ©cial Healer
+            if (actionsJ1 == "Action SpÃ©" && classeJ1 == "Healer")
             {
                 PvJoueur += 2;
             }
             //Attaques
             if (actionsJ1 == "Attaquer")
             {
-                if (actionsJ2 != "Défendre")
+                if (actionsJ2 != "DÃ©fendre")
                 {
-                    PvOrdi--;
+                    if (classeJ1 == "Damager")
+                    {
+                        PvOrdi -= 2;
+                    }
+                    else
+                    {
+                        PvOrdi--;
+                    }
+            
                     if (rageO)
                     {
                         PvJoueur--;
                     }
                 }
             }
-
+            
             //ORDINATEUR
-            //Spécial Tank
-            if (actionsJ1 == "Action Spé" && classeJ2 == "Tank")
+            //SpÃ©cial Tank
+            if (actionsJ1 == "Action SpÃ©" && classeJ2 == "Tank")
             {
                 PvOrdi--;
-                if (actionsJ1 != "Défendre")
+                if (actionsJ1 != "DÃ©fendre")
                 {
                     PvJoueur -= 2;
                     if (rageJ)
@@ -262,25 +274,37 @@ namespace JeuDeCombat
                         PvOrdi -= 2;
                     }
                 }
+                else
+                {
+                    PvJoueur -= 1;
+                }
             }
-            //Spécial Healer
-            if (actionsJ2 == "Action Spé" && classeJ2 == "Healer")
+            //SpÃ©cial Healer
+            if (actionsJ2 == "Action SpÃ©" && classeJ2 == "Healer")
             {
                 PvOrdi += 2;
             }
             //Attaques
             if (actionsJ2 == "Attaquer")
             {
-                if (actionsJ1 != "Défendre")
+                if (actionsJ1 != "DÃ©fendre")
                 {
-                    PvJoueur--;
+                    if (classeJ2 == "Damager")
+                    {
+                        PvJoueur -= 2;
+                    }
+                    else
+                    {
+                        PvJoueur--;
+                    }
+            
                     if (rageJ)
                     {
                         PvOrdi--;
                     }
                 }
             }
-            //Empêche d'avoir plus de pv que le max (pour les healers)
+            //EmpÃªche d'avoir plus de pv que le max (pour les healers)
             if (classeJ1 == "Healer" && PvJoueur > 4) PvJoueur = 4;
             if (classeJ2 == "Healer" && PvOrdi > 4) PvJoueur = 4;
 
@@ -289,7 +313,7 @@ namespace JeuDeCombat
             if (PvJoueur <= 0 || PvOrdi <= 0) Interface_Fin(PvJoueur, PvOrdi);
         }
 
-        //Gère la fin du match
+        //GÃ¨re la fin du match
         private void Interface_Fin(int PvJoueur, int PvOrdi)
         {
             name.Hide();
@@ -300,7 +324,7 @@ namespace JeuDeCombat
             Valider.Click += new EventHandler (endForm);
             if (PvJoueur <= 0 && PvOrdi <= 0)
             {
-                name.Text = "Vous avez fait égalité.";
+                name.Text = "Vous avez fait Ã©galitÃ©.";
             }
             else if (PvJoueur <= 0)
             {
@@ -308,7 +332,7 @@ namespace JeuDeCombat
             }
             else if (PvOrdi <= 0)
             {
-                name.Text = "Vous avez gagné.";
+                name.Text = "Vous avez gagnÃ©.";
             }
             name.TextAlign = ContentAlignment.TopCenter;
             name.Show();
@@ -321,3 +345,4 @@ namespace JeuDeCombat
 
     }
 }
+

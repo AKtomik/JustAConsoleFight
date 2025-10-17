@@ -29,22 +29,22 @@ namespace JeuDeCombat
         // character & round
         public string characterName;
         public Character character;
-        public int maxHp
+        public int MaxHp
         {
             get => character.maxHp;
         }
-        public int atk
+        public int Atk
         {
             get => character.atk;
         }
-        public double ratio
+        public double Ratio
         {
-            get => hp / maxHp;
+            get => hp / MaxHp;
         }
 
         Round round;
         int roundIndex;
-        public Player enemy
+        public Player Enemy
         {
             get => this.round.player[Math.Abs(roundIndex - 1)];
         }
@@ -84,7 +84,7 @@ namespace JeuDeCombat
         }
 
         // tool
-        public bool isCharacter(string CharacterName)
+        public bool IsCharacter(string CharacterName)
 		{
             return Character.all[CharacterName] == character;
 		}
@@ -122,21 +122,21 @@ namespace JeuDeCombat
                         bool willSpecial = Round.random.Next(1, 4) == 4;
                         if (willSpecial)
                             return "Action Spé";
-                        else if (enemy.hp < this.hp)
+                        else if (Enemy.hp < this.hp)
                             return "Attaquer";
                         else
                             return "Défendre";
                     }
                 case 2:
                     {// random
-                        return Form1.actions[Round.random.Next(1, 3)];
+                        return Form1.AviableActions[Round.random.Next(1, 3)];
                     }
                 case 3:
                     {// protect when weak, attack when strong
                         bool willSpecial = Round.random.Next(1, 4) == 4;
                         if (willSpecial)
                             return "Action Spé";
-                        else if (enemy.hp < this.hp)
+                        else if (Enemy.hp < this.hp)
                             return "Attaquer";
                         else
                             return "Défendre";
@@ -145,8 +145,8 @@ namespace JeuDeCombat
                     {// smarter
                         int probaSpecialPercent = 10;
                         int probaAttackPercent = 50;
-                        probaSpecialPercent += (int)Math.Round(this.ratio * 100);
-                        probaSpecialPercent += (int)Math.Round((this.ratio - enemy.ratio) * 100);
+                        probaSpecialPercent += (int)Math.Round(this.Ratio * 100);
+                        probaSpecialPercent += (int)Math.Round((this.Ratio - Enemy.Ratio) * 100);
 
                         if (Round.random.Next(100) < probaSpecialPercent)
                             return "Attaque Spé";
@@ -190,11 +190,11 @@ namespace JeuDeCombat
             bool rageJ = false;
             bool rageO = false;
             //Verification Rage
-            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Tank")) rageJ = true;
-            if (playersActions[1] == "Action Spé" && player[1].isCharacter("Tank")) rageO = true;
+            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank")) rageJ = true;
+            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Tank")) rageO = true;
             //Joueur
             //Spécial Tank
-            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Tank"))
+            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank"))
             {
                 player[0].hp--;
                 if (playersActions[1] != "Défendre")
@@ -211,7 +211,7 @@ namespace JeuDeCombat
                 }
             }
             //Spécial Healer
-            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Healer"))
+            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Healer"))
             {
                 player[0].hp += 2;
             }
@@ -220,7 +220,7 @@ namespace JeuDeCombat
             {
                 if (playersActions[1] != "Défendre")
                 {
-                    if (player[0].isCharacter("Damager"))
+                    if (player[0].IsCharacter("Damager"))
                     {
                         player[1].hp -= 2;
                     }
@@ -238,7 +238,7 @@ namespace JeuDeCombat
             
             //ORDINATEUR
             //Spécial Tank
-            if (playersActions[0] == "Action Spé" && player[1].isCharacter("Tank"))
+            if (playersActions[0] == "Action Spé" && player[1].IsCharacter("Tank"))
             {
                 player[1].hp--;
                 if (playersActions[0] != "Défendre")
@@ -255,7 +255,7 @@ namespace JeuDeCombat
                 }
             }
             //Spécial Healer
-            if (playersActions[1] == "Action Spé" && player[1].isCharacter("Healer"))
+            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Healer"))
             {
                 player[1].hp += 2;
             }
@@ -264,7 +264,7 @@ namespace JeuDeCombat
             {
                 if (playersActions[0] != "Défendre")
                 {
-                    if (player[1].isCharacter("Damager"))
+                    if (player[1].IsCharacter("Damager"))
                     {
                         player[0].hp -= 2;
                     }
@@ -280,8 +280,8 @@ namespace JeuDeCombat
                 }
             }
             //Empêche d'avoir plus de pv que le max (pour les healers)
-            if (player[0].isCharacter("Healer") && player[0].hp > 4) player[0].hp = 4;
-            if (player[1].isCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
+            if (player[0].IsCharacter("Healer") && player[0].hp > 4) player[0].hp = 4;
+            if (player[1].IsCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
 
 
             if (player[0].hp <= 0) return 0;
@@ -292,11 +292,12 @@ namespace JeuDeCombat
 
     public partial class Form1 : Form
     {
-
+        //Variable pour les listes de choix
+        public static readonly string[] AviableCharacters = ["Damager", "Healer", "Tank" ];
+        public static readonly string[] AviableActions = ["Attaquer", "Défendre", "Action Spé" ];
+        public static readonly string[] AviableDifficulties = ["1", "2", "3", "4"];
+        
         //Variable pour l'UI du menu
-        public static List<string> classe = new List<string> { "Damager", "Healer", "Tank" };
-        public static List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
-        public static List<string> difficulte = new List<string>() { "1", "2", "3", "4" };
         Button Valider;
         
         //Variables pour la détection du choix
@@ -324,9 +325,9 @@ namespace JeuDeCombat
             
         }
         //Faire apparaitre les différents boutons de choix
-        private void PutButton(List<string> ListOfText, EventHandler actionToDo)
+        private void PutButton(string[] ListOfText, EventHandler actionToDo)
         {
-            for (int i = 0; i < ListOfText.Count; i++)
+            for (int i = 0; i < ListOfText.Length; i++)
             {
                 RadioButton buttonClasse = new RadioButton();
                 choiceButtons.Controls.Add(buttonClasse);
@@ -345,7 +346,7 @@ namespace JeuDeCombat
             Validate();
             Valider.Click += new EventHandler(ChooseDifficulty);
             textClass.Text = "Veuillez choisir une classe.";
-            PutButton(classe, buttonChoose);
+            PutButton(AviableCharacters, buttonChoose);
         }
 
         private void ChooseDifficulty(object sender, EventArgs e)
@@ -355,7 +356,7 @@ namespace JeuDeCombat
             textClass.Text = "Choisissez une difficulté";
             Valider.Click -= new EventHandler(ChooseDifficulty);
             Valider.Click += new EventHandler(PlayRound);
-            PutButton(difficulte, difficultyToChoose);
+            PutButton(AviableDifficulties, difficultyToChoose);
             
         }
         //Permet de sélectionner une difficulté via les boutons
@@ -422,7 +423,7 @@ namespace JeuDeCombat
             Valider.Hide();
             textClass.Hide();
             textClass.Text = "Choisissez une action.";
-            PutButton(actions, actionChoose);
+            PutButton(AviableActions, actionChoose);
             choiceButtons.Show();
             textClass.Show();
             

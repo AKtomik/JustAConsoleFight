@@ -114,9 +114,8 @@ namespace JeuDeCombat
             {
                 case 0:
                     {// do nothing
-                        //playersActions[1] = 4;
+                        return "AFK";//for compile
                     }
-                    break;
                 case 1:
                     {// attack when weak, protect when strong (k that dumb)
                         bool willSpecial = Round.random.Next(1, 4) == 4;

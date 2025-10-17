@@ -1,4 +1,5 @@
 using System;
+using Microsoft.VisualBasic.Devices;
 
 namespace JeuDeCombat
 {
@@ -25,23 +26,50 @@ namespace JeuDeCombat
 
 	public class Player
     {
-
-        public string? character;
-        public int hp = 0;
-        //int maxHp;
-
-        public bool? isHuman;
-        public int? botLevel;
-
-        public string? action;
-        public string? nextAction;
-        
-        public Player()
+        // character & round
+        public string characterName;
+        public Character character;
+        public int maxHp
         {
+            get => character.maxHp;
+        }
+        public int atk
+        {
+            get => character.atk;
+        }
+        public double ratio
+        {
+            get => hp / maxHp;
         }
 
-        public void SetClass(Character character)
+        Round round;
+        int roundIndex;
+        public Player enemy
         {
+            get => this.round.player[Math.Abs(roundIndex - 1)];
+        }
+            
+        // atributes
+        public int hp = 0;
+
+        // compute
+        public bool isHuman = false;
+        public int botLevel = 0;
+
+        public string? lastAction = "";
+        public string nextAction = "";
+        
+        // init
+        public Player(Round round, int roundIndex)
+		{
+            this.round = round;
+            this.roundIndex = roundIndex;
+		}
+
+        public void SetClass(string characterName)
+        {
+            this.characterName = characterName;
+            this.character = Character.all[characterName];
             hp = character.maxHp;
         }
         
@@ -55,15 +83,84 @@ namespace JeuDeCombat
             botLevel = level;
         }
 
+        // tool
+        public bool isCharacter(string CharacterName)
+		{
+            return Character.all[CharacterName] == character;
+		}
+
+        // play
         public void SetNextAction(string action)
         {
             this.nextAction = action;
         }
-        
-        public string GetPlayAction(Round round)
+        public string GetPlayerTurn()
         {
-            this.action = this.nextAction;
-            return action;
+            if (isHuman)
+            {
+                this.lastAction = this.nextAction;
+                return lastAction;
+            }
+            else
+			{
+                this.lastAction = ComputerTurn();
+                return lastAction;
+			}
+        }
+        
+        string ComputerTurn()
+        {
+            switch (botLevel)
+            {
+                case 0:
+                    {// do nothing
+                        //playersActions[1] = 4;
+                    }
+                    break;
+                case 1:
+                    {// attack when weak, protect when strong (k that dumb)
+                        bool willSpecial = Round.random.Next(1, 4) == 4;
+                        if (willSpecial)
+                            return "Action Spé";
+                        else if (enemy.hp < this.hp)
+                            return "Attaquer";
+                        else
+                            return "Défendre";
+                    }
+                case 2:
+                    {// random
+                        return Form1.actions[Round.random.Next(1, 3)];
+                    }
+                case 3:
+                    {// protect when weak, attack when strong
+                        bool willSpecial = Round.random.Next(1, 4) == 4;
+                        if (willSpecial)
+                            return "Action Spé";
+                        else if (enemy.hp < this.hp)
+                            return "Attaquer";
+                        else
+                            return "Défendre";
+                    }
+                case 4:
+                    {// smarter
+                        int probaSpecialPercent = 10;
+                        int probaAttackPercent = 50;
+                        probaSpecialPercent += (int)Math.Round(this.ratio * 100);
+                        probaSpecialPercent += (int)Math.Round((this.ratio - enemy.ratio) * 100);
+
+                        if (Round.random.Next(100) < probaSpecialPercent)
+                            return "Attaque Spé";
+                        else if (Round.random.Next(100) < probaAttackPercent)
+                            return "Attaquer";
+                        else
+                            return "Défendre";
+                    }
+                default:
+                    {
+                        return "AFK";//for compile
+                    }
+            }
+            return "AFK";//for compile
 		}
     }
     
@@ -71,179 +168,125 @@ namespace JeuDeCombat
     {
 
         public int turn = 0;
-        public Random random = new Random();
-        public Player[] player  = [new(), new()];
+        public static Random random = new Random();
+        public Player[] player;
 
         public Round()
-		{
+        {
+            player = [new(this, 0), new(this, 1)];
 		}
 
         public void Start()
         {
         }
         
-        private void Fight()
+        // take the fight. Return -1 if need to continue. Else return the player index (0/1)
+        public int Fight()
         {
-            string[] playersActions = [player[0].GetPlayAction(this), player[1].GetPlayAction(this)];
+            string[] playersActions = [player[0].GetPlayerTurn(), player[1].GetPlayerTurn()];
 
             turn++;
-            switch (difficultyChoose)
-            {
-                case 0:
-                    {// do nothing
-                        //actionsJ2 = 4;
-                    }
-                    break;
-                case 1:
-                    {// attack when weak, protect when strong (k that dumb)
-                        bool willSpecial = random.Next(1, 4) == 4;
-                        if (willSpecial)
-                            actionsJ2 = "Action Spé";
-                        else if (PvJoueur < PvOrdi)
-                            actionsJ2 = "Attaquer";
-                        else
-                            actionsJ2 = "Défendre";
-                    }
-                    break;
-                case 2:
-                    {// random
-                        actionsJ2 = actions[random.Next(1, 3)];
-                    }
-                    break;
-                case 3:
-                    {// protect when weak, attack when strong
-                        bool willSpecial = random.Next(1, 4) == 4;
-                        if (willSpecial)
-                            actionsJ2 = "Action Spé";
-                        else if (PvJoueur > PvOrdi)
-                            actionsJ2 = "Attaquer";
-                        else
-                            actionsJ2 = "Défendre";
-                    }
-                    break;
-                case 4:
-                    {// smarter
-                        float ratioOrdi = PvOrdi / maxPvOrdi;
-                        float ratioJoueur = PvJoueur / maxPvJoueur;
 
-                        int probaSpecialPercent = 10;
-                        int probaAttackPercent = 50;
-                        probaSpecialPercent += (int)Math.Round(ratioOrdi * 100);
-                        probaSpecialPercent += (int)Math.Round((ratioOrdi - ratioJoueur) * 100);
-
-                        if (random.Next(100) < probaSpecialPercent)
-                            actionsJ2 = "Attaque Spé";
-                        else if (random.Next(100) < probaAttackPercent)
-                            actionsJ2 = "Attaquer";
-                        else
-                            actionsJ2 = "Défendre";
-                    }
-                    break;
-                default:
-                    {
-
-                    }
-                    break;
-            }
             bool rageJ = false;
             bool rageO = false;
             //Verification Rage
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Tank") rageJ = true;
-            if (actionsJ2 == "Action Spé" && classeJ2 == "Tank") rageO = true;
+            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Tank")) rageJ = true;
+            if (playersActions[1] == "Action Spé" && player[1].isCharacter("Tank")) rageO = true;
             //Joueur
             //Spécial Tank
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Tank")
+            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Tank"))
             {
-                PvJoueur--;
-                if (actionsJ2 != "Défendre")
+                player[0].hp--;
+                if (playersActions[1] != "Défendre")
                 {
-                    PvOrdi -= 2;
+                    player[1].hp -= 2;
                     if (rageO)
                     {
-                        PvJoueur -= 2;
+                        player[0].hp -= 2;
                     }
                 }
                 else
                 {
-                    PvOrdi -= 1;
+                    player[1].hp -= 1;
                 }
             }
             //Spécial Healer
-            if (actionsJ1 == "Action Spé" && classeJ1 == "Healer")
+            if (playersActions[0] == "Action Spé" && player[0].isCharacter("Healer"))
             {
-                PvJoueur += 2;
+                player[0].hp += 2;
             }
             //Attaques
-            if (actionsJ1 == "Attaquer")
+            if (playersActions[0] == "Attaquer")
             {
-                if (actionsJ2 != "Défendre")
+                if (playersActions[1] != "Défendre")
                 {
-                    if (classeJ1 == "Damager")
+                    if (player[0].isCharacter("Damager"))
                     {
-                        PvOrdi -= 2;
+                        player[1].hp -= 2;
                     }
                     else
                     {
-                        PvOrdi--;
+                        player[1].hp--;
                     }
             
                     if (rageO)
                     {
-                        PvJoueur--;
+                        player[0].hp--;
                     }
                 }
             }
             
             //ORDINATEUR
             //Spécial Tank
-            if (actionsJ1 == "Action Spé" && classeJ2 == "Tank")
+            if (playersActions[0] == "Action Spé" && player[1].isCharacter("Tank"))
             {
-                PvOrdi--;
-                if (actionsJ1 != "Défendre")
+                player[1].hp--;
+                if (playersActions[0] != "Défendre")
                 {
-                    PvJoueur -= 2;
+                    player[0].hp -= 2;
                     if (rageJ)
                     {
-                        PvOrdi -= 2;
+                        player[1].hp -= 2;
                     }
                 }
                 else
                 {
-                    PvJoueur -= 1;
+                    player[0].hp -= 1;
                 }
             }
             //Spécial Healer
-            if (actionsJ2 == "Action Spé" && classeJ2 == "Healer")
+            if (playersActions[1] == "Action Spé" && player[1].isCharacter("Healer"))
             {
-                PvOrdi += 2;
+                player[1].hp += 2;
             }
             //Attaques
-            if (actionsJ2 == "Attaquer")
+            if (playersActions[1] == "Attaquer")
             {
-                if (actionsJ1 != "Défendre")
+                if (playersActions[0] != "Défendre")
                 {
-                    if (classeJ2 == "Damager")
+                    if (player[1].isCharacter("Damager"))
                     {
-                        PvJoueur -= 2;
+                        player[0].hp -= 2;
                     }
                     else
                     {
-                        PvJoueur--;
+                        player[0].hp--;
                     }
             
                     if (rageJ)
                     {
-                        PvOrdi--;
+                        player[1].hp--;
                     }
                 }
             }
             //Empêche d'avoir plus de pv que le max (pour les healers)
-            if (classeJ1 == "Healer" && PvJoueur > 4) PvJoueur = 4;
-            if (classeJ2 == "Healer" && PvOrdi > 4) PvJoueur = 4;
+            if (player[0].isCharacter("Healer") && player[0].hp > 4) player[0].hp = 4;
+            if (player[1].isCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
 
-            Stats(playerStat, PvJoueur, classeJ1, actionsJ1);
-            Stats(ordiStats, PvOrdi, classeJ2, actionsJ2);
-            if (PvJoueur <= 0 || PvOrdi <= 0) Interface_Fin(PvJoueur, PvOrdi);
+
+            if (player[0].hp <= 0) return 0;
+            if (player[1].hp <= 0) return 1;
+            return -1;
         }
     }
 
@@ -251,10 +294,10 @@ namespace JeuDeCombat
     {
 
         //Variable pour l'UI du menu
+        public static List<string> classe = new List<string> { "Damager", "Healer", "Tank" };
+        public static List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
+        public static List<string> difficulte = new List<string>() { "1", "2", "3", "4" };
         Button Valider;
-        List<string> classe = new List<string> { "Damager", "Healer", "Tank" };
-        List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
-        List<string> difficulte = new List<string>() { "1", "2", "3", "4" };
         
         //Variables pour la détection du choix
         string classChoice;
@@ -343,12 +386,12 @@ namespace JeuDeCombat
 
             // human player set
             round.player[0].SetHuman();
-            round.player[0].SetClass(Character.all[classChoice]);
+            round.player[0].SetClass(classChoice);
 
             // bot player set
-            int ClassInt = round.random.Next(Character.all.Keys.Count) + 1;
+            int ClassInt = Round.random.Next(Character.all.Keys.Count) + 1;
             string classeChoisieBot = Character.all.Keys.ToArray()[ClassInt - 1];
-            round.player[1].SetClass(Character.all[classeChoisieBot]);
+            round.player[1].SetClass(classeChoisieBot);
 
             // ui
             ShowAttackPickUi();
@@ -359,7 +402,8 @@ namespace JeuDeCombat
         // prohcain tour
         private void PlayTurn(object sender, EventArgs e)
         {
-            round.Fight();
+            int winner = round.Fight();
+            if (winner != -1) EndUi();
 
             // ui
             ShowAttackPickUi();
@@ -382,8 +426,8 @@ namespace JeuDeCombat
             choiceButtons.Show();
             textClass.Show();
             
-            Stats(playerStat, round.player[0].hp, round.player[0].character, round.player[0].action);
-            Stats(ordiStats, round.player[1].hp, round.player[1].character, round.player[0].action);
+            Stats(playerStat, round.player[0].hp, round.player[0].characterName, round.player[0].lastAction);
+            Stats(ordiStats, round.player[1].hp, round.player[1].characterName, round.player[0].lastAction);
 		}
 
         //Permet la création et le choix des boutons d'attaques
@@ -413,7 +457,7 @@ namespace JeuDeCombat
         }
 
         //Gère la fin du match
-        private void Interface_Fin(int PvJoueur, int PvOrdi)
+        private void EndUi()
         {
             name.Hide();
             choiceButtons.Hide();
@@ -421,15 +465,15 @@ namespace JeuDeCombat
             ordiStats.Hide();
             textClass.Hide();
             Valider.Click += new EventHandler (endForm);
-            if (PvJoueur <= 0 && PvOrdi <= 0)
+            if (round.player[0].hp <= 0 && round.player[1].hp <= 0)
             {
                 name.Text = "Vous avez fait égalité.";
             }
-            else if (PvJoueur <= 0)
+            else if (round.player[0].hp <= 0)
             {
                 name.Text = "Vous avez perdu.";
             }
-            else if (PvOrdi <= 0)
+            else if (round.player[1].hp <= 0)
             {
                 name.Text = "Vous avez gagné.";
             }

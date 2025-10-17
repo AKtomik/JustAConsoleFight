@@ -2,158 +2,91 @@ using System;
 
 namespace JeuDeCombat
 {
-    public partial class Form1 : Form
+    public class Settings
     {
-        //Variable pour l'UI du menu
-        Button Valider;
-        List<string> classe = new List<string> { "Damager", "Healer", "Tank" };
-        string classeJ1;
-        string classeJ2;
-        bool isClassChoose = false;
-        List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
-        List<string> difficulte = new List<string>() { "1", "2", "3", "4"};
-        int difficultyChoose;
-        int manche = 0;
-        int PvJoueur;
-        int maxPvJoueur;
-        string actionsJ1 = "";
-        string actionsJ2 = "";
-        int PvOrdi;
-        int maxPvOrdi;
-        bool firstRound = true;
-
-        public Form1()
+    }
+    
+    public class Character(int maxHp, int atk)
+	{
+        public static readonly Dictionary<string, Character> all = new()
         {
-            InitializeComponent();
-        }
+            {"Damager", new Character(maxHp: 3, atk: 2)},
+            {"Healer", new Character(maxHp: 4, atk: 1)},
+            {"Tank", new Character(maxHp: 5, atk: 1)},
+        };
+
+        //public static string[] = Character.all.Keys.ToArray();
+        
+        // utilisation des constructeurs primaires
+        public int maxHp = maxHp;
+        public int atk = atk;
+	}
 
 
+	public class Player
+    {
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            Validate();
-            Valider.Click += new EventHandler(ChooseDifficulty);
-            textClass.Text = "Veuillez choisir une classe.";
-            PutButton(classe, buttonChoose);
-        }
+        public string? character;
+        public int hp = 0;
+        //int maxHp;
 
-        //Fait apparaitre le bouton valider
-        private void Validate()
+        public bool? isHuman;
+        public int? botLevel;
+
+        public string? action;
+        public string? nextAction;
+        
+        public Player()
         {
-            Valider = new Button();
-            Controls.Add(Valider);
-            Valider.Text = "Valider";
-            Valider.Location = new Point(350, 400);
-            
-        }
-        //Faire apparaitre les différents boutons de choix
-        private void PutButton(List<string> ListOfText, EventHandler actionToDo)
-        {
-            for (int i = 0; i < ListOfText.Count; i++)
-            {
-                RadioButton buttonClasse = new RadioButton();
-                choiceButtons.Controls.Add(buttonClasse);
-                buttonClasse.Location = new Point(25 + 150 * i, 25);
-                buttonClasse.Text = ListOfText[i];
-                buttonClasse.Click += new EventHandler(actionToDo);
-            }
         }
 
-        private void ChooseDifficulty(object sender, EventArgs e)
+        public void SetClass(Character character)
         {
-            choiceButtons.Controls.Clear();
-            choiceButtons.Text = "Difficulté";
-            textClass.Text = "Choisissez une difficulté";
-            Valider.Click -= new EventHandler(ChooseDifficulty);
-            Valider.Click += new EventHandler(LaunchBattle);
-            PutButton(difficulte, difficultyToChoose);
-            
+            hp = character.maxHp;
         }
-        //Permet de sélectionner une difficulté via les boutons
-        private void difficultyToChoose(object sender, EventArgs e)
+        
+        public void SetHuman()
+		{
+            isHuman = true;
+		}
+        public void SetBot(int level)
         {
-            RadioButton classr = (RadioButton)sender;
-            String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
-            difficultyChoose = int.Parse(buttonTook);
-        }
-        //Permet de sélectionner une classe via les boutons
-        private void buttonChoose(object sender, EventArgs e)
-        {
-            RadioButton classr = (RadioButton)sender;
-            String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi " + buttonTook + ".";
-            classeJ1 = buttonTook;
-            if (!isClassChoose) isClassChoose = true;
+            isHuman = false;
+            botLevel = level;
         }
 
-        //Gère le lancement du combat
-        private void LaunchBattle(object sender, EventArgs e)
+        public void SetNextAction(string action)
         {
-            textClass.Text = "Le combat commence";
-            choiceButtons.Hide();
-            choiceButtons.Controls.Clear();
-            choiceButtons.Text = "Action";
-            Valider.Hide();
-            textClass.Hide();
-            textClass.Text = "Choisissez une action.";
-            PutButton(actions, actionChoose);
-            choiceButtons.Show();
-            textClass.Show();
-            if (firstRound)
-            {
-                Random random = new Random();
-                Dictionary<string, int> ViePerso = new Dictionary<string, int>();
-                Dictionary<string, int> AttaquePerso = new Dictionary<string, int>();
-                ViePerso.Add("Damager", 3); ViePerso.Add("Healer", 4); ViePerso.Add("Tank", 5);
-                AttaquePerso.Add("Damager", 2); AttaquePerso.Add("Healer", 1); AttaquePerso.Add("Tank", 1);
-                PvJoueur = ViePerso[classeJ1];
-                maxPvJoueur = PvJoueur;
-                int ChoixOrdi = random.Next(1, 3);
-                classeJ2 = classe[ChoixOrdi - 1];
-                PvOrdi = ViePerso[classeJ2];
-                maxPvOrdi = PvOrdi;
-                firstRound = false;
-            }
-            InGame();
-            Valider.Show();
-
+            this.nextAction = action;
         }
+        
+        public string GetPlayAction(Round round)
+        {
+            this.action = this.nextAction;
+            return action;
+		}
+    }
+    
+    public class Round
+    {
 
-        //Gère la création et la mise à jour des stats
-        private void Stats(GroupBox StatsBox, int pv, string classPlayer, string lastAction)
-        {
-            StatsBox.Controls.Clear();
-            List<string> statsList = new List<string> { "PV : ", "Classe : ", "Dernière action : ", lastAction };
-            List<string> statsString = new List<string>() { pv.ToString(), classPlayer, "", "" };
-            
-            for (int i = 0; i < statsList.Count; i++)
-            {
-                Label statsText= new Label();
-                StatsBox.Controls.Add(statsText);
-                statsText.Location = new Point(5, 25*i+25);
-                statsText.Text = statsList[i] + statsString[i];
-            }
-            StatsBox.Show();
-        }
-        //Permet la création et le choix des boutons d'attaques
-        private void actionChoose(object sender, EventArgs e)
-        {
-            RadioButton classr = (RadioButton)sender;
-            String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi " + buttonTook + ".";
-            actionsJ1 = buttonTook;
-        }
+        public int turn = 0;
+        public Random random = new Random();
+        public Player[] player  = [new(), new()];
 
-        //Gère le combat
-        private void InGame()
+        public Round()
+		{
+		}
+
+        public void Start()
         {
-            manche++;
-            name.Text = "Manche " + manche;
-            name.TextAlign = ContentAlignment.TopCenter;
-            Stats(playerStat, PvJoueur, classeJ1, actionsJ1);
-            Stats(ordiStats, PvOrdi, classeJ2, actionsJ2);
-            Random random = new Random();
+        }
+        
+        private void Fight()
+        {
+            string[] playersActions = [player[0].GetPlayAction(this), player[1].GetPlayAction(this)];
+
+            turn++;
             switch (difficultyChoose)
             {
                 case 0:
@@ -311,6 +244,172 @@ namespace JeuDeCombat
             Stats(playerStat, PvJoueur, classeJ1, actionsJ1);
             Stats(ordiStats, PvOrdi, classeJ2, actionsJ2);
             if (PvJoueur <= 0 || PvOrdi <= 0) Interface_Fin(PvJoueur, PvOrdi);
+        }
+    }
+
+    public partial class Form1 : Form
+    {
+
+        //Variable pour l'UI du menu
+        Button Valider;
+        List<string> classe = new List<string> { "Damager", "Healer", "Tank" };
+        List<string> actions = new List<string> { "Attaquer", "Défendre", "Action Spé" };
+        List<string> difficulte = new List<string>() { "1", "2", "3", "4" };
+        
+        //Variables pour la détection du choix
+        string classChoice;
+        string actionChoice;
+        int difficultyChoice;
+
+        //Variables pour la manche
+        Round round;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        // UTILITAIRE
+        
+        //Fait apparaitre le bouton valider
+        private void Validate()
+        {
+            Valider = new Button();
+            Controls.Add(Valider);
+            Valider.Text = "Valider";
+            Valider.Location = new Point(350, 400);
+            
+        }
+        //Faire apparaitre les différents boutons de choix
+        private void PutButton(List<string> ListOfText, EventHandler actionToDo)
+        {
+            for (int i = 0; i < ListOfText.Count; i++)
+            {
+                RadioButton buttonClasse = new RadioButton();
+                choiceButtons.Controls.Add(buttonClasse);
+                buttonClasse.Location = new Point(25 + 150 * i, 25);
+                buttonClasse.Text = ListOfText[i];
+                buttonClasse.Click += new EventHandler(actionToDo);
+            }
+        }
+
+
+        // JOUER LES PARAMÈTRES
+        // les fonctions forment une chaine et sont dans l'odre
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Validate();
+            Valider.Click += new EventHandler(ChooseDifficulty);
+            textClass.Text = "Veuillez choisir une classe.";
+            PutButton(classe, buttonChoose);
+        }
+
+        private void ChooseDifficulty(object sender, EventArgs e)
+        {
+            choiceButtons.Controls.Clear();
+            choiceButtons.Text = "Difficulté";
+            textClass.Text = "Choisissez une difficulté";
+            Valider.Click -= new EventHandler(ChooseDifficulty);
+            Valider.Click += new EventHandler(PlayRound);
+            PutButton(difficulte, difficultyToChoose);
+            
+        }
+        //Permet de sélectionner une difficulté via les boutons
+        private void difficultyToChoose(object sender, EventArgs e)
+        {
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
+            difficultyChoice = int.Parse(buttonTook);
+        }
+        //Permet de sélectionner une classe via les boutons
+        private void buttonChoose(object sender, EventArgs e)
+        {
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi " + buttonTook + ".";
+            classChoice = buttonTook;
+        }
+
+        // JOUER LA MANCHE
+        // les fonctions Play() sont des boucles
+
+        // lancer une manche
+        private void PlayRound(object sender, EventArgs e)
+        {
+            // round init
+            round = new Round();
+
+            // human player set
+            round.player[0].SetHuman();
+            round.player[0].SetClass(Character.all[classChoice]);
+
+            // bot player set
+            int ClassInt = round.random.Next(Character.all.Keys.Count) + 1;
+            string classeChoisieBot = Character.all.Keys.ToArray()[ClassInt - 1];
+            round.player[1].SetClass(Character.all[classeChoisieBot]);
+
+            // ui
+            ShowAttackPickUi();
+            Valider.Click -= new EventHandler(PlayRound);
+            Valider.Click += new EventHandler(PlayTurn);
+		}
+
+        // prohcain tour
+        private void PlayTurn(object sender, EventArgs e)
+        {
+            round.Fight();
+
+            // ui
+            ShowAttackPickUi();
+
+
+            Valider.Show();
+        }
+        
+        // monter l'interface du choix d'action
+        private void ShowAttackPickUi()
+		{
+            textClass.Text = "Le combat commence";
+            choiceButtons.Hide();
+            choiceButtons.Controls.Clear();
+            choiceButtons.Text = "Action";
+            Valider.Hide();
+            textClass.Hide();
+            textClass.Text = "Choisissez une action.";
+            PutButton(actions, actionChoose);
+            choiceButtons.Show();
+            textClass.Show();
+            
+            Stats(playerStat, round.player[0].hp, round.player[0].character, round.player[0].action);
+            Stats(ordiStats, round.player[1].hp, round.player[1].character, round.player[0].action);
+		}
+
+        //Permet la création et le choix des boutons d'attaques
+        private void actionChoose(object sender, EventArgs e)
+        {
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi " + buttonTook + ".";
+            actionChoice = buttonTook;
+        }
+        
+        //Gère la création et la mise à jour des stats
+        private void Stats(GroupBox StatsBox, int pv, string classPlayer, string lastAction)
+        {
+            StatsBox.Controls.Clear();
+            List<string> statsList = new List<string> { "PV : ", "Classe : ", "Dernière action : ", lastAction };
+            List<string> statsString = new List<string>() { pv.ToString(), classPlayer, "", "" };
+            
+            for (int i = 0; i < statsList.Count; i++)
+            {
+                Label statsText= new Label();
+                StatsBox.Controls.Add(statsText);
+                statsText.Location = new Point(5, 25*i+25);
+                statsText.Text = statsList[i] + statsString[i];
+            }
+            StatsBox.Show();
         }
 
         //Gère la fin du match

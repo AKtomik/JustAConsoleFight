@@ -282,6 +282,8 @@ namespace JeuDeCombat
             if (player[1].IsCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
 
 
+            if (player[0].hp <= 0 && player[1].hp <= 0) return -2;
+            if (turn >= 100) return -3;
             if (player[0].hp <= 0) return 0;
             if (player[1].hp <= 0) return 1;
             return -1;
@@ -305,8 +307,8 @@ namespace JeuDeCombat
         int difficultyChoice;
         string classBot1Choice;
         string classBot2Choice;
-        string levelBot1Choice;
-        string levelBot2Choice;
+        int levelBot1Choice;
+        int levelBot2Choice;
 
         //Variables pour la manche
         Round round;
@@ -616,7 +618,7 @@ namespace JeuDeCombat
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
             textClass.Text = "Vous avez choisi la difficulté " + buttonTook + ".";
-            levelBot1Choice = buttonTook;
+            levelBot1Choice = int.Parse(buttonTook);
             ValidButton.Show();
         }
 
@@ -647,7 +649,7 @@ namespace JeuDeCombat
             SetText("Veuillez choisir une difficulté pour le bot 2.");
             choiceButtons.Text = "Difficulté";
             PutRadio(AviableDifficulties, Bot2LevelPick);
-            SetValidate(Menu);
+            SetValidate(Simulate);
             ValidButton.Hide();
         }
 
@@ -658,8 +660,50 @@ namespace JeuDeCombat
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
             textClass.Text = "Vous avez choisi la difficulté " + buttonTook + ".";
-            levelBot2Choice = buttonTook;
+            levelBot2Choice = int.Parse(buttonTook);
             ValidButton.Show();
+        }
+
+        // Do the simulation
+        private void Simulate(object? sender, EventArgs e)
+        {
+            int winBot1 = 0;
+            int winBot2 = 0;
+            int winSteal = 0;
+
+            // round init
+            round = new Round();
+            round.player[0].SetBot(levelBot1Choice);
+            round.player[0].SetClass(classBot1Choice);
+            round.player[1].SetBot(levelBot1Choice);
+            round.player[1].SetClass(classBot1Choice);
+            
+            for (int i = 0; i < 100; i++)
+			{
+                int winner = -1;
+                while (winner == -1)
+                {
+                    winner = round.Fight();
+                }
+                
+                if (winner == -2 || winner == -3)
+                    winSteal += 1;
+                else if (winner == 0)
+                    winBot1 += 1;
+                else if (winner == 1)
+                    winBot2 += 1;
+			}
+
+            
+            name.Hide();
+            choiceButtons.Hide();
+            playerStat.Hide();
+            ordiStats.Hide();
+            textClass.Hide();
+            SetValidate(Menu);
+            name.Text = "Bot 1 : "+winBot1+" Bot 2 : "+winBot2+" égal : "+winSteal;
+            name.TextAlign = ContentAlignment.TopCenter;
+            name.Show();
         }
     }
 }

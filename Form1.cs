@@ -56,7 +56,7 @@ namespace JeuDeCombat
         public bool isHuman = false;
         public int botLevel = 0;
 
-        public string? lastAction = "";
+        public string lastAction = "";
         public string nextAction = "";
         
         // init
@@ -159,7 +159,6 @@ namespace JeuDeCombat
                         return "AFK";//for compile
                     }
             }
-            return "AFK";//for compile
 		}
     }
     
@@ -297,7 +296,7 @@ namespace JeuDeCombat
         public static readonly string[] AviableDifficulties = ["1", "2", "3", "4"];
         
         //Variable pour l'UI du menu
-        Button Valider;
+        Button ValidButton;
         
         //Variables pour la détection du choix
         string classChoice;
@@ -310,19 +309,32 @@ namespace JeuDeCombat
         public Form1()
         {
             InitializeComponent();
+            CreateValidate();
         }
 
         // UTILITAIRE
-        
-        //Fait apparaitre le bouton valider
-        private void Validate()
+
+        //Créer le bouton valider
+        private void CreateValidate()
         {
-            Valider = new Button();
-            Controls.Add(Valider);
-            Valider.Text = "Valider";
-            Valider.Location = new Point(350, 400);
-            
+            ValidButton = new Button();
+            Controls.Add(ValidButton);
+            ValidButton.Text = "Valider";
+            ValidButton.Location = new Point(350, 400);
         }
+        
+        private EventHandler _currentHandler;
+        private void SetValidate(EventHandler newEvent)
+        {
+            if (_currentHandler != null) ValidButton.Click -= _currentHandler;
+            _currentHandler = newEvent;
+            ValidButton.Click += newEvent;
+        }
+        private void SetText(string message)
+        {
+            textClass.Text = message;
+        }
+        
         //Faire apparaitre les différents boutons de choix
         private void PutButton(string[] ListOfText, EventHandler actionToDo)
         {
@@ -340,46 +352,52 @@ namespace JeuDeCombat
         // JOUER LES PARAMÈTRES
         // les fonctions forment une chaine et sont dans l'odre
 
-        private void Form1_Load(object sender, EventArgs e)
+        // étape de sélection de la classe
+        private void Form1_Load(object? sender, EventArgs e)
         {
-            Validate();
-            Valider.Click += new EventHandler(ChooseDifficulty);
-            textClass.Text = "Veuillez choisir une classe.";
-            PutButton(AviableCharacters, buttonChoose);
+            SetText("Veuillez choisir une classe.");
+            PutButton(AviableCharacters, characterChoose);
+            SetValidate(ChooseDifficulty);
+            ValidButton.Hide();
         }
 
-        private void ChooseDifficulty(object sender, EventArgs e)
+        // étape de sélection de la difficulté
+        private void ChooseDifficulty(object? sender, EventArgs e)
         {
             choiceButtons.Controls.Clear();
             choiceButtons.Text = "Difficulté";
             textClass.Text = "Choisissez une difficulté";
-            Valider.Click -= new EventHandler(ChooseDifficulty);
-            Valider.Click += new EventHandler(PlayRound);
             PutButton(AviableDifficulties, difficultyToChoose);
+            SetValidate(PlayRound);
+            ValidButton.Hide();
             
         }
         //Permet de sélectionner une difficulté via les boutons
-        private void difficultyToChoose(object sender, EventArgs e)
+        private void difficultyToChoose(object? sender, EventArgs e)
         {
+            if (sender == null) return;
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
             textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
             difficultyChoice = int.Parse(buttonTook);
+            ValidButton.Show();
         }
         //Permet de sélectionner une classe via les boutons
-        private void buttonChoose(object sender, EventArgs e)
+        private void characterChoose(object? sender, EventArgs e)
         {
+            if (sender == null) return;
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
             textClass.Text = "Vous avez choisi " + buttonTook + ".";
             classChoice = buttonTook;
+            ValidButton.Show();
         }
 
         // JOUER LA MANCHE
         // les fonctions Play() sont des boucles
 
         // lancer une manche
-        private void PlayRound(object sender, EventArgs e)
+        private void PlayRound(object? sender, EventArgs e)
         {
             // round init
             round = new Round();
@@ -391,52 +409,59 @@ namespace JeuDeCombat
             // bot player set
             int ClassInt = Round.random.Next(Character.all.Keys.Count) + 1;
             string classeChoisieBot = Character.all.Keys.ToArray()[ClassInt - 1];
+            round.player[1].SetBot(difficultyChoice);
             round.player[1].SetClass(classeChoisieBot);
 
             // ui
-            ShowAttackPickUi();
-            Valider.Click -= new EventHandler(PlayRound);
-            Valider.Click += new EventHandler(PlayTurn);
+            TurnUiUpdate();
+            SetValidate(PlayTurn);
+            ValidButton.Hide();
 		}
 
         // prohcain tour
-        private void PlayTurn(object sender, EventArgs e)
+        private void PlayTurn(object? sender, EventArgs e)
         {
             int winner = round.Fight();
-            if (winner != -1) EndUi();
+            if (winner != -1)
+            {
+                VictoryUi(winner);
+                return;
+            }
 
             // ui
-            ShowAttackPickUi();
+            TurnUiUpdate();
+            name.Text = "winner:" + winner;
 
-
-            Valider.Show();
+            ValidButton.Show();
         }
         
         // monter l'interface du choix d'action
-        private void ShowAttackPickUi()
+        private void TurnUiUpdate()
 		{
-            textClass.Text = "Le combat commence";
+            name.Text = "tour " + (round.turn + 1);
             choiceButtons.Hide();
             choiceButtons.Controls.Clear();
             choiceButtons.Text = "Action";
-            Valider.Hide();
             textClass.Hide();
             textClass.Text = "Choisissez une action.";
             PutButton(AviableActions, actionChoose);
             choiceButtons.Show();
             textClass.Show();
+            ValidButton.Hide();
             
             Stats(playerStat, round.player[0].hp, round.player[0].characterName, round.player[0].lastAction);
-            Stats(ordiStats, round.player[1].hp, round.player[1].characterName, round.player[0].lastAction);
+            Stats(ordiStats, round.player[1].hp, round.player[1].characterName, round.player[1].lastAction);
 		}
 
         //Permet la création et le choix des boutons d'attaques
-        private void actionChoose(object sender, EventArgs e)
+        private void actionChoose(object? sender, EventArgs e)
         {
+            if (sender == null) return;
             RadioButton classr = (RadioButton)sender;
-            String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi " + buttonTook + ".";
-            actionChoice = buttonTook;
+            actionChoice = classr.Text;
+            textClass.Text = "Vous avez choisi " + actionChoice + ".";
+            round.player[0].SetNextAction(actionChoice);
+            ValidButton.Show();
         }
         
         //Gère la création et la mise à jour des stats
@@ -457,23 +482,23 @@ namespace JeuDeCombat
         }
 
         //Gère la fin du match
-        private void EndUi()
+        private void VictoryUi(int winner)
         {
             name.Hide();
             choiceButtons.Hide();
             playerStat.Hide();
             ordiStats.Hide();
             textClass.Hide();
-            Valider.Click += new EventHandler (endForm);
-            if (round.player[0].hp <= 0 && round.player[1].hp <= 0)
+            ValidButton.Click += new EventHandler (endForm);
+            if (winner == -2)
             {
                 name.Text = "Vous avez fait égalité.";
             }
-            else if (round.player[0].hp <= 0)
+            else if (winner == 1)
             {
                 name.Text = "Vous avez perdu.";
             }
-            else if (round.player[1].hp <= 0)
+            else if (winner == 0)
             {
                 name.Text = "Vous avez gagné.";
             }
@@ -481,7 +506,7 @@ namespace JeuDeCombat
             name.Show();
         }
 
-        private void endForm(object sender, EventArgs e)
+        private void endForm(object? sender, EventArgs e)
         {
             Close();
         }

@@ -178,7 +178,7 @@ namespace JeuDeCombat
         {
         }
         
-        // take the fight. Return -1 if need to continue. Else return the player index (0/1)
+        // take the fight. Return -1 if need to continue. Return -2 if equality. Else return the player index (0/1)
         public int Fight()
         {
             string[] playersActions = [player[0].GetPlayerTurn(), player[1].GetPlayerTurn()];
@@ -291,17 +291,22 @@ namespace JeuDeCombat
     public partial class Form1 : Form
     {
         //Variable pour les listes de choix
-        public static readonly string[] AviableCharacters = ["Damager", "Healer", "Tank" ];
-        public static readonly string[] AviableActions = ["Attaquer", "Défendre", "Action Spé" ];
+        public static readonly string[] AviableCharacters = ["Damager", "Healer", "Tank"];
+        public static readonly string[] AviableActions = ["Attaquer", "Défendre", "Action Spé"];
         public static readonly string[] AviableDifficulties = ["1", "2", "3", "4"];
-        
+
         //Variable pour l'UI du menu
-        Button ValidButton;
-        
+        Button ValidButton = new();
+        Button[] MenuButtons = [new(), new(), new()];
+
         //Variables pour la détection du choix
         string classChoice;
         string actionChoice;
         int difficultyChoice;
+        string classBot1Choice;
+        string classBot2Choice;
+        string levelBot1Choice;
+        string levelBot2Choice;
 
         //Variables pour la manche
         Round round;
@@ -310,6 +315,7 @@ namespace JeuDeCombat
         {
             InitializeComponent();
             CreateValidate();
+            CreateMenu();
         }
 
         // UTILITAIRE
@@ -317,12 +323,28 @@ namespace JeuDeCombat
         //Créer le bouton valider
         private void CreateValidate()
         {
-            ValidButton = new Button();
             Controls.Add(ValidButton);
             ValidButton.Text = "Valider";
             ValidButton.Location = new Point(350, 400);
         }
-        
+
+        //Créer le menu
+        private void CreateMenu()
+        {
+            Controls.Add(MenuButtons[0]);
+            Controls.Add(MenuButtons[1]);
+            Controls.Add(MenuButtons[2]);
+            MenuButtons[0].Text = "Jouer";
+            MenuButtons[0].Location = new Point(200, 400);
+            MenuButtons[0].Click += PlayGame;
+            MenuButtons[1].Text = "Simuler";
+            MenuButtons[1].Location = new Point(350, 400);
+            MenuButtons[1].Click += PlaySimulate;
+            MenuButtons[2].Text = "Quiter";
+            MenuButtons[2].Location = new Point(500, 400);
+            MenuButtons[2].Click += Close;
+        }
+
         private EventHandler _currentHandler;
         private void SetValidate(EventHandler newEvent)
         {
@@ -330,14 +352,21 @@ namespace JeuDeCombat
             _currentHandler = newEvent;
             ValidButton.Click += newEvent;
         }
+
         private void SetText(string message)
         {
             textClass.Text = message;
         }
-        
-        //Faire apparaitre les différents boutons de choix
-        private void PutButton(string[] ListOfText, EventHandler actionToDo)
+        private void SetTitle(string message)
         {
+            name.Text = message;
+        }
+
+        //Faire apparaitre les différents boutons de choix
+        private void PutRadio(string[] ListOfText, EventHandler actionToDo)
+        {
+            choiceButtons.Show();
+            choiceButtons.Controls.Clear();
             for (int i = 0; i < ListOfText.Length; i++)
             {
                 RadioButton buttonClasse = new RadioButton();
@@ -348,48 +377,89 @@ namespace JeuDeCombat
             }
         }
 
-
-        // JOUER LES PARAMÈTRES
+        // FONCTIONS MENU
         // les fonctions forment une chaine et sont dans l'odre
 
-        // étape de sélection de la classe
+        // étape menu principal
         private void Form1_Load(object? sender, EventArgs e)
         {
-            SetText("Veuillez choisir une classe.");
-            PutButton(AviableCharacters, characterChoose);
-            SetValidate(ChooseDifficulty);
+            Menu(sender, e);
+        }
+        
+        private void Close(object? sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void Menu(object? sender, EventArgs e)
+        {
+            CreateMenu();
+            MenuButtons.ToList().ForEach(v => v.Show());
+            SetText("bienvenue !");
+            SetTitle("Super Street Combat 74 Deluxe Premium +");
+            choiceButtons.Hide();
             ValidButton.Hide();
         }
 
-        // étape de sélection de la difficulté
-        private void ChooseDifficulty(object? sender, EventArgs e)
+        private void PlayGame(object? sender, EventArgs e)
         {
-            choiceButtons.Controls.Clear();
-            choiceButtons.Text = "Difficulté";
-            textClass.Text = "Choisissez une difficulté";
-            PutButton(AviableDifficulties, difficultyToChoose);
-            SetValidate(PlayRound);
+            MenuButtons.ToList().ForEach(v => v.Hide());
+            textClass.Show();
+            CharacterChoose(sender, e);
+        }
+
+        private void PlaySimulate(object? sender, EventArgs e)
+        {
+            MenuButtons.ToList().ForEach(v => v.Hide());
+            textClass.Show();
+            Bot1ClassChoose(sender, e);
+        }
+        
+        // PARAMÈTRES JEU
+        // les fonctions forment une chaine et sont dans l'odre
+
+
+
+        // étape de sélection de la classe
+        private void CharacterChoose(object? sender, EventArgs e)
+        {
+
+            choiceButtons.Text = "Classe";
+            SetText("Veuillez choisir une classe.");
+            PutRadio(AviableCharacters, CharacterPick);
+            SetValidate(DifficultyChoose);
             ValidButton.Hide();
-            
         }
-        //Permet de sélectionner une difficulté via les boutons
-        private void difficultyToChoose(object? sender, EventArgs e)
-        {
-            if (sender == null) return;
-            RadioButton classr = (RadioButton)sender;
-            String buttonTook = classr.Text;
-            textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
-            difficultyChoice = int.Parse(buttonTook);
-            ValidButton.Show();
-        }
+
         //Permet de sélectionner une classe via les boutons
-        private void characterChoose(object? sender, EventArgs e)
+        private void CharacterPick(object? sender, EventArgs e)
         {
             if (sender == null) return;
             RadioButton classr = (RadioButton)sender;
             String buttonTook = classr.Text;
             textClass.Text = "Vous avez choisi " + buttonTook + ".";
             classChoice = buttonTook;
+            ValidButton.Show();
+        }
+
+        // étape de sélection de la difficulté
+        private void DifficultyChoose(object? sender, EventArgs e)
+        {
+            choiceButtons.Text = "Difficulté";
+            textClass.Text = "Choisissez une difficulté";
+            PutRadio(AviableDifficulties, DifficultyPick);
+            SetValidate(PlayRound);
+            ValidButton.Hide();
+        }
+
+        //Permet de sélectionner une difficulté via les boutons
+        private void DifficultyPick(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi la difficulté " + buttonTook;
+            difficultyChoice = int.Parse(buttonTook);
             ValidButton.Show();
         }
 
@@ -416,7 +486,7 @@ namespace JeuDeCombat
             TurnUiUpdate();
             SetValidate(PlayTurn);
             ValidButton.Hide();
-		}
+        }
 
         // prohcain tour
         private void PlayTurn(object? sender, EventArgs e)
@@ -430,31 +500,30 @@ namespace JeuDeCombat
 
             // ui
             TurnUiUpdate();
-            name.Text = "winner:" + winner;
+            //name.Text = "winner:" + winner;
 
             ValidButton.Show();
         }
-        
+
         // monter l'interface du choix d'action
         private void TurnUiUpdate()
-		{
+        {
             name.Text = "tour " + (round.turn + 1);
             choiceButtons.Hide();
-            choiceButtons.Controls.Clear();
             choiceButtons.Text = "Action";
             textClass.Hide();
             textClass.Text = "Choisissez une action.";
-            PutButton(AviableActions, actionChoose);
+            PutRadio(AviableActions, ActionPick);
             choiceButtons.Show();
             textClass.Show();
             ValidButton.Hide();
-            
+
             Stats(playerStat, round.player[0].hp, round.player[0].characterName, round.player[0].lastAction);
             Stats(ordiStats, round.player[1].hp, round.player[1].characterName, round.player[1].lastAction);
-		}
+        }
 
         //Permet la création et le choix des boutons d'attaques
-        private void actionChoose(object? sender, EventArgs e)
+        private void ActionPick(object? sender, EventArgs e)
         {
             if (sender == null) return;
             RadioButton classr = (RadioButton)sender;
@@ -463,19 +532,19 @@ namespace JeuDeCombat
             round.player[0].SetNextAction(actionChoice);
             ValidButton.Show();
         }
-        
+
         //Gère la création et la mise à jour des stats
         private void Stats(GroupBox StatsBox, int pv, string classPlayer, string lastAction)
         {
             StatsBox.Controls.Clear();
             List<string> statsList = new List<string> { "PV : ", "Classe : ", "Dernière action : ", lastAction };
             List<string> statsString = new List<string>() { pv.ToString(), classPlayer, "", "" };
-            
+
             for (int i = 0; i < statsList.Count; i++)
             {
-                Label statsText= new Label();
+                Label statsText = new Label();
                 StatsBox.Controls.Add(statsText);
-                statsText.Location = new Point(5, 25*i+25);
+                statsText.Location = new Point(5, 25 * i + 25);
                 statsText.Text = statsList[i] + statsString[i];
             }
             StatsBox.Show();
@@ -489,7 +558,7 @@ namespace JeuDeCombat
             playerStat.Hide();
             ordiStats.Hide();
             textClass.Hide();
-            ValidButton.Click += new EventHandler (endForm);
+            SetValidate(Menu);
             if (winner == -2)
             {
                 name.Text = "Vous avez fait égalité.";
@@ -506,11 +575,92 @@ namespace JeuDeCombat
             name.Show();
         }
 
-        private void endForm(object? sender, EventArgs e)
+
+        // PARAMÈTRES SIMULATION
+
+        // étape de sélection de la classe du bot 1
+        private void Bot1ClassChoose(object? sender, EventArgs e)
         {
-            Close();
+            SetText("Veuillez choisir une classe pour le bot 1.");
+            choiceButtons.Text = "Classe";
+            PutRadio(AviableCharacters, Bot1ClassPick);
+            SetValidate(Bot1LevelChoose);
+            ValidButton.Hide();
         }
 
+        //Permet de sélectionner une classe via les boutons
+        private void Bot1ClassPick(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi " + buttonTook + " pour le bot 1.";
+            classBot1Choice = buttonTook;
+            ValidButton.Show();
+        }
+
+        // étape de sélection du niveau du bot 1
+        private void Bot1LevelChoose(object? sender, EventArgs e)
+        {
+            SetText("Veuillez choisir une difficulté pour le bot 1.");
+            choiceButtons.Text = "Difficulté";
+            PutRadio(AviableDifficulties, Bot1LevelPick);
+            SetValidate(Bot2ClassChoose);
+            ValidButton.Hide();
+        }
+
+        //Permet de sélectionner un niveau via les boutons
+        private void Bot1LevelPick(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi la difficulté " + buttonTook + ".";
+            levelBot1Choice = buttonTook;
+            ValidButton.Show();
+        }
+
+        // étape de sélection de la classe du bot 2
+        private void Bot2ClassChoose(object? sender, EventArgs e)
+        {
+            SetText("Veuillez choisir une classe pour le bot 2.");
+            choiceButtons.Text = "Classe";
+            PutRadio(AviableCharacters, Bot2ClassPick);
+            SetValidate(Bot2LevelChoose);
+            ValidButton.Hide();
+        }
+
+        //Permet de sélectionner une classe via les boutons
+        private void Bot2ClassPick(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi " + buttonTook + " pour le bot 2.";
+            classBot2Choice = buttonTook;
+            ValidButton.Show();
+        }
+
+        // étape de sélection du niveau du bot 2
+        private void Bot2LevelChoose(object? sender, EventArgs e)
+        {
+            SetText("Veuillez choisir une difficulté pour le bot 2.");
+            choiceButtons.Text = "Difficulté";
+            PutRadio(AviableDifficulties, Bot2LevelPick);
+            SetValidate(Menu);
+            ValidButton.Hide();
+        }
+
+        //Permet de sélectionner un niveau via les boutons
+        private void Bot2LevelPick(object? sender, EventArgs e)
+        {
+            if (sender == null) return;
+            RadioButton classr = (RadioButton)sender;
+            String buttonTook = classr.Text;
+            textClass.Text = "Vous avez choisi la difficulté " + buttonTook + ".";
+            levelBot2Choice = buttonTook;
+            ValidButton.Show();
+        }
     }
 }
 

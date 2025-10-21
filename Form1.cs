@@ -231,7 +231,7 @@ namespace JeuDeCombat
                     }
                     if (player[0].IsCharacter("Goblin"))
                     {
-                        player[1].hp -= 1*player[1].SpecialGoblinAmount;
+                        player[1].hp -= 1*player[0].SpecialGoblinAmount;
                     }
                     else
                     {
@@ -276,6 +276,10 @@ namespace JeuDeCombat
                     if (player[1].IsCharacter("Damager"))
                     {
                         player[0].hp -= 2;
+                    }
+                    if (player[1].IsCharacter("Goblin"))
+                    {
+                        player[0].hp -= 1*player[1].SpecialGoblinAmount;
                     }
                     else
                     {

@@ -213,7 +213,7 @@ namespace JeuDeCombat
                     }
                     if (this.IsCharacter("Goblin"))
                     {
-                        Enemy.hp -= 1 * this.SpecialGoblinAmount;
+                        Enemy.hp -= this.SpecialGoblinAmount;
                     }
                     else
                     {
@@ -685,4 +685,5 @@ namespace JeuDeCombat
         }
     }
 }
+
 

@@ -353,7 +353,7 @@ namespace JeuDeCombat
             MenuButtons[1].Text = "Simuler";
             MenuButtons[1].Location = new Point(350, 400);
             MenuButtons[1].Click += PlaySimulate;
-            MenuButtons[2].Text = "Quiter";
+            MenuButtons[2].Text = "Quitter";
             MenuButtons[2].Location = new Point(500, 400);
             MenuButtons[2].Click += Close;
         }
@@ -408,7 +408,7 @@ namespace JeuDeCombat
         {
             CreateMenu();
             MenuButtons.ToList().ForEach(v => v.Show());
-            SetText("bienvenue !");
+            SetText("Bienvenue !");
             SetTitle("Super Street Combat 74 Deluxe Premium +");
             choiceButtons.Hide();
             ValidButton.Hide();

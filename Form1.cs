@@ -94,7 +94,22 @@ namespace JeuDeCombat
         {
             this.nextAction = action;
         }
+
         public string GetPlayerTurn()
+        {
+            if (isHuman)
+            {
+                this.lastAction = this.nextAction;
+                return lastAction;
+            }
+            else
+            {
+                this.lastAction = ComputerTurn();
+                return lastAction;
+            }
+        }
+        
+        public string NextPlayerTurn()
         {
             if (isHuman)
             {
@@ -117,35 +132,17 @@ namespace JeuDeCombat
                         return "AFK";//for compile
                     }
                 case 1:
-                    {// attack when weak, protect when strong (k that dumb)
-                        bool willSpecial = Round.random.Next(1, 4) == 4;
-                        if (willSpecial)
-                            return "Action Spé";
-                        else if (Enemy.hp < this.hp)
-                            return "Attaquer";
-                        else
-                            return "Défendre";
+                    {// attack when weak, protect when stron
+                        return "Attaquer";
                     }
                 case 2:
-                    {// random
-                        return Form1.AviableActions[Round.random.Next(1, 3)];
+                    {// pure random
+                        return Form1.AviableActions[Round.random.Next(3)];
                     }
                 case 3:
-                    {// protect when weak, attack when strong
-                        bool willSpecial = Round.random.Next(1, 4) == 4;
-                        if (willSpecial)
-                            return "Action Spé";
-                        else if (Enemy.hp < this.hp)
-                            return "Attaquer";
-                        else
-                            return "Défendre";
-                    }
-                case 4:
-                    {// smarter
-                        int probaSpecialPercent = 10;
-                        int probaAttackPercent = 50;
-                        probaSpecialPercent += (int)Math.Round(this.Ratio * 100);
-                        probaSpecialPercent += (int)Math.Round((this.Ratio - Enemy.Ratio) * 100);
+                    {// use ratio to think
+                        int probaSpecialPercent = (int)Math.Round(this.Ratio * 100);
+                        int probaAttackPercent = (int)Math.Round((this.Ratio - Enemy.Ratio) * 100);
 
                         if (Round.random.Next(100) < probaSpecialPercent)
                             return "Attaque Spé";
@@ -153,6 +150,13 @@ namespace JeuDeCombat
                             return "Attaquer";
                         else
                             return "Défendre";
+                    }
+                case 4:
+                    {// smarter
+                        if (Enemy.lastAction == "Attaquer") return "Défendre";
+                        if (Enemy.lastAction == "Défendre") return "Attaque Spé";
+                        if (Enemy.lastAction == "Attaque Spé") return "Attaquer";
+                        return "Défendre";
                     }
                 default:
                     {
@@ -510,7 +514,7 @@ namespace JeuDeCombat
         // monter l'interface du choix d'action
         private void TurnUiUpdate()
         {
-            name.Text = "tour " + (round.turn + 1);
+            name.Text = "Tour " + (round.turn + 1);
             choiceButtons.Hide();
             choiceButtons.Text = "Action";
             textClass.Hide();

@@ -671,15 +671,16 @@ namespace JeuDeCombat
             int winBot2 = 0;
             int winSteal = 0;
 
-            // round init
-            round = new Round();
-            round.player[0].SetBot(levelBot1Choice);
-            round.player[0].SetClass(classBot1Choice);
-            round.player[1].SetBot(levelBot1Choice);
-            round.player[1].SetClass(classBot1Choice);
             
             for (int i = 0; i < 100; i++)
 			{
+                // round init
+                round = new Round();
+                round.player[0].SetBot(levelBot1Choice);
+                round.player[0].SetClass(classBot1Choice);
+                round.player[1].SetBot(levelBot2Choice);
+                round.player[1].SetClass(classBot2Choice);
+                
                 int winner = -1;
                 while (winner == -1)
                 {

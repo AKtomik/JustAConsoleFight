@@ -4,8 +4,9 @@
 - RUN THE PROJECT.
 
 1. Download the project.
-2. Open JeuDeCombat.sln.
-3. Run.
+2. Downlaod Windows Forms
+3. Open JeuDeCombat.sln.
+4. Run.
 
 - HOW TO PLAY AS A PLAYER.
 
@@ -25,4 +26,5 @@
 4. Choose second IA's class.
 5. Choose its difficulty.
 6. You now have the results from a hundred battle simulation between the two IAs.
+
 7. Click on "Valider" button and come back to menu.

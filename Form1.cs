@@ -194,9 +194,6 @@ namespace JeuDeCombat
 
             turn++;
 
-            //Verification Rage
-            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank")) player[0].SpecialRage = true;
-            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Tank")) player[1].SpecialRage = true;
             //Joueur
             //Spécial Tank
             if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank"))
@@ -219,6 +216,11 @@ namespace JeuDeCombat
             if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Healer"))
             {
                 player[0].hp += 2;
+            }
+            //Spécial Goblin
+            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Goblin"))
+            {
+                player[0].SpecialGoblinAmount += 1;
             }
             //Attaques
             if (playersActions[0] == "Attaquer")
@@ -268,6 +270,11 @@ namespace JeuDeCombat
             {
                 player[1].hp += 2;
             }
+            //Spécial Goblin
+            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Goblin"))
+            {
+                player[1].SpecialGoblinAmount += 1;
+            }
             //Attaques
             if (playersActions[1] == "Attaquer")
             {
@@ -295,7 +302,10 @@ namespace JeuDeCombat
             //Empêche d'avoir plus de pv que le max (pour les healers)
             if (player[0].IsCharacter("Healer") && player[0].hp > 4) player[0].hp = 4;
             if (player[1].IsCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
-
+            
+            //Verification Rage
+            player[0].SpecialRage = playersActions[0] == "Action Spé";
+            player[1].SpecialRage = playersActions[1] == "Action Spé";
 
             if (player[0].hp <= 0 && player[1].hp <= 0) return -2;
             if (turn >= 100) return -3;

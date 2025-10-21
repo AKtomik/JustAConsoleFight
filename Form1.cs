@@ -14,6 +14,7 @@ namespace JeuDeCombat
             {"Damager", new Character(maxHp: 3, atk: 2)},
             {"Healer", new Character(maxHp: 4, atk: 1)},
             {"Tank", new Character(maxHp: 5, atk: 1)},
+            {"Gobelin", new Character(maxHp: 3, atk: 1)},
         };
 
         //public static string[] = Character.all.Keys.ToArray();
@@ -58,6 +59,10 @@ namespace JeuDeCombat
 
         public string lastAction = "";
         public string nextAction = "";
+
+        // special
+        public bool SpecialRage = false;
+        public int SpecialGoblinAmount = 1;
         
         // init
         public Player(Round round, int roundIndex)
@@ -189,11 +194,9 @@ namespace JeuDeCombat
 
             turn++;
 
-            bool rageJ = false;
-            bool rageO = false;
             //Verification Rage
-            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank")) rageJ = true;
-            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Tank")) rageO = true;
+            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank")) player[0].SpecialRage = true;
+            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Tank")) player[1].SpecialRage = true;
             //Joueur
             //Spécial Tank
             if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank"))
@@ -202,7 +205,7 @@ namespace JeuDeCombat
                 if (playersActions[1] != "Défendre")
                 {
                     player[1].hp -= 2;
-                    if (rageO)
+                    if (player[1].SpecialRage)
                     {
                         player[0].hp -= 2;
                     }
@@ -226,12 +229,16 @@ namespace JeuDeCombat
                     {
                         player[1].hp -= 2;
                     }
+                    if (player[0].IsCharacter("Gobelin"))
+                    {
+                        player[1].hp -= 1*player[1].SpecialGoblinAmount;
+                    }
                     else
                     {
                         player[1].hp--;
                     }
             
-                    if (rageO)
+                    if (player[1].SpecialRage)
                     {
                         player[0].hp--;
                     }
@@ -246,7 +253,7 @@ namespace JeuDeCombat
                 if (playersActions[0] != "Défendre")
                 {
                     player[0].hp -= 2;
-                    if (rageJ)
+                    if (player[0].SpecialRage)
                     {
                         player[1].hp -= 2;
                     }
@@ -275,7 +282,7 @@ namespace JeuDeCombat
                         player[0].hp--;
                     }
             
-                    if (rageJ)
+                    if (player[0].SpecialRage)
                     {
                         player[1].hp--;
                     }

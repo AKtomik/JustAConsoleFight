@@ -261,8 +261,8 @@ namespace JeuDeCombat
 
             if (player[0].hp <= 0 && player[1].hp <= 0) return -2;
             if (turn >= 100) return -3;
-            if (player[0].hp <= 0) return 0;
-            if (player[1].hp <= 0) return 1;
+            if (player[0].hp <= 0) return 1;
+            if (player[1].hp <= 0) return 0;
             return -1;
         }
     }

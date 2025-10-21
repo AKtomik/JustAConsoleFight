@@ -173,7 +173,7 @@ namespace JeuDeCombat
         public void Hit()
         {
             //Spécial Tank
-            if (Enemy.lastAction == "Action Spé" && this.IsCharacter("Tank"))
+            if (this.lastAction == "Action Spé" && this.IsCharacter("Tank"))
             {
                 this.hp--;
                 if (Enemy.lastAction != "Défendre")
@@ -211,7 +211,7 @@ namespace JeuDeCombat
                     {
                         Enemy.hp -= 2;
                     }
-                    if (this.IsCharacter("Goblin"))
+                    else if (this.IsCharacter("Goblin"))
                     {
                         Enemy.hp -= this.SpecialGoblinAmount;
                     }
@@ -227,7 +227,7 @@ namespace JeuDeCombat
                 }
             }
 
-            this.SpecialRage = this.IsCharacter("Tank") && this.lastAction == "Action Spé";
+            this.SpecialRage = this.IsCharacter("Damager") && this.lastAction == "Action Spé";
 
             if (this.hp > this.MaxHp) this.hp = this.MaxHp;
 		}

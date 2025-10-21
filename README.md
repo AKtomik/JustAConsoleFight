@@ -17,7 +17,7 @@
 6. Play until there is a winner or a tie. 
 7. Click on "Valider" button and come back to menu.
 
-- HOW TO PLAY WITH TWO IA SIMULATION.
+- HOW TO PLAY WITH TWO IAs SIMULATION.
 
 1. Choose "Simuler".
 2. Choose the class of the first IA.

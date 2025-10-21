@@ -127,7 +127,7 @@ namespace JeuDeCombat
                 return lastAction;
 			}
         }
-        
+
         string ComputerTurn()
         {
             switch (botLevel)
@@ -168,6 +168,68 @@ namespace JeuDeCombat
                         return "AFK";//for compile
                     }
             }
+        }
+
+        public void Hit()
+        {
+            //Spécial Tank
+            if (Enemy.lastAction == "Action Spé" && this.IsCharacter("Tank"))
+            {
+                this.hp--;
+                if (Enemy.lastAction != "Défendre")
+                {
+                    Enemy.hp -= 2;
+                    if (Enemy.SpecialRage)
+                    {
+                        this.hp -= 2;
+                    }
+                }
+                else
+                {
+                    Enemy.hp -= 1;
+                }
+            }
+
+            //Spécial Healer
+            if (this.lastAction == "Action Spé" && this.IsCharacter("Healer"))
+            {
+                this.hp += 2;
+            }
+
+            //Spécial Goblin
+            if (this.lastAction == "Action Spé" && this.IsCharacter("Goblin"))
+            {
+                this.SpecialGoblinAmount += 1;
+            }
+            
+            //Attaques
+            if (this.lastAction == "Attaquer")
+            {
+                if (Enemy.lastAction != "Défendre")
+                {
+                    if (this.IsCharacter("Damager"))
+                    {
+                        Enemy.hp -= 2;
+                    }
+                    if (this.IsCharacter("Goblin"))
+                    {
+                        Enemy.hp -= 1 * this.SpecialGoblinAmount;
+                    }
+                    else
+                    {
+                        Enemy.hp--;
+                    }
+
+                    if (Enemy.SpecialRage)
+                    {
+                        this.hp--;
+                    }
+                }
+            }
+
+            this.SpecialRage = this.IsCharacter("Tank") && this.lastAction == "Action Spé";
+
+            if (this.hp > this.MaxHp) this.hp = this.MaxHp;
 		}
     }
     
@@ -190,122 +252,12 @@ namespace JeuDeCombat
         // take the fight. Return -1 if need to continue. Return -2 if equality. Else return the player index (0/1)
         public int Fight()
         {
-            string[] playersActions = [player[0].GetPlayerTurn(), player[1].GetPlayerTurn()];
-
+            player[0].GetPlayerTurn();
+            player[1].GetPlayerTurn();
+            player[0].Hit();
+            player[1].Hit();
+             
             turn++;
-
-            //Joueur
-            //Spécial Tank
-            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Tank"))
-            {
-                player[0].hp--;
-                if (playersActions[1] != "Défendre")
-                {
-                    player[1].hp -= 2;
-                    if (player[1].SpecialRage)
-                    {
-                        player[0].hp -= 2;
-                    }
-                }
-                else
-                {
-                    player[1].hp -= 1;
-                }
-            }
-            //Spécial Healer
-            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Healer"))
-            {
-                player[0].hp += 2;
-            }
-            //Spécial Goblin
-            if (playersActions[0] == "Action Spé" && player[0].IsCharacter("Goblin"))
-            {
-                player[0].SpecialGoblinAmount += 1;
-            }
-            //Attaques
-            if (playersActions[0] == "Attaquer")
-            {
-                if (playersActions[1] != "Défendre")
-                {
-                    if (player[0].IsCharacter("Damager"))
-                    {
-                        player[1].hp -= 2;
-                    }
-                    if (player[0].IsCharacter("Goblin"))
-                    {
-                        player[1].hp -= 1*player[0].SpecialGoblinAmount;
-                    }
-                    else
-                    {
-                        player[1].hp--;
-                    }
-            
-                    if (player[1].SpecialRage)
-                    {
-                        player[0].hp--;
-                    }
-                }
-            }
-            
-            //ORDINATEUR
-            //Spécial Tank
-            if (playersActions[0] == "Action Spé" && player[1].IsCharacter("Tank"))
-            {
-                player[1].hp--;
-                if (playersActions[0] != "Défendre")
-                {
-                    player[0].hp -= 2;
-                    if (player[0].SpecialRage)
-                    {
-                        player[1].hp -= 2;
-                    }
-                }
-                else
-                {
-                    player[0].hp -= 1;
-                }
-            }
-            //Spécial Healer
-            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Healer"))
-            {
-                player[1].hp += 2;
-            }
-            //Spécial Goblin
-            if (playersActions[1] == "Action Spé" && player[1].IsCharacter("Goblin"))
-            {
-                player[1].SpecialGoblinAmount += 1;
-            }
-            //Attaques
-            if (playersActions[1] == "Attaquer")
-            {
-                if (playersActions[0] != "Défendre")
-                {
-                    if (player[1].IsCharacter("Damager"))
-                    {
-                        player[0].hp -= 2;
-                    }
-                    if (player[1].IsCharacter("Goblin"))
-                    {
-                        player[0].hp -= 1*player[1].SpecialGoblinAmount;
-                    }
-                    else
-                    {
-                        player[0].hp--;
-                    }
-            
-                    if (player[0].SpecialRage)
-                    {
-                        player[1].hp--;
-                    }
-                }
-            }
-            //Empêche d'avoir plus de pv que le max (pour les healers)
-            if (player[0].IsCharacter("Healer") && player[0].hp > 4) player[0].hp = 4;
-            if (player[1].IsCharacter("Healer") && player[1].hp > 4) player[0].hp = 4;
-            
-            //Verification Rage
-            player[0].SpecialRage = playersActions[0] == "Action Spé";
-            player[1].SpecialRage = playersActions[1] == "Action Spé";
 
             if (player[0].hp <= 0 && player[1].hp <= 0) return -2;
             if (turn >= 100) return -3;

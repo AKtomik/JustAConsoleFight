@@ -14,7 +14,7 @@ namespace JeuDeCombat
             {"Damager", new Character(maxHp: 3, atk: 2)},
             {"Healer", new Character(maxHp: 4, atk: 1)},
             {"Tank", new Character(maxHp: 5, atk: 1)},
-            {"Gobelin", new Character(maxHp: 3, atk: 1)},
+            {"Goblin", new Character(maxHp: 3, atk: 1)},
         };
 
         //public static string[] = Character.all.Keys.ToArray();
@@ -229,7 +229,7 @@ namespace JeuDeCombat
                     {
                         player[1].hp -= 2;
                     }
-                    if (player[0].IsCharacter("Gobelin"))
+                    if (player[0].IsCharacter("Goblin"))
                     {
                         player[1].hp -= 1*player[1].SpecialGoblinAmount;
                     }
@@ -304,7 +304,7 @@ namespace JeuDeCombat
     public partial class Form1 : Form
     {
         //Variable pour les listes de choix
-        public static readonly string[] AviableCharacters = ["Damager", "Healer", "Tank"];
+        public static readonly string[] AviableCharacters = ["Damager", "Healer", "Tank", "Goblin"];
         public static readonly string[] AviableActions = ["Attaquer", "Défendre", "Action Spé"];
         public static readonly string[] AviableDifficulties = ["1", "2", "3", "4"];
 
@@ -384,7 +384,7 @@ namespace JeuDeCombat
             {
                 RadioButton buttonClasse = new RadioButton();
                 choiceButtons.Controls.Add(buttonClasse);
-                buttonClasse.Location = new Point(25 + 150 * i, 25);
+                buttonClasse.Location = new Point(25 + 120 * i, 25);
                 buttonClasse.Text = ListOfText[i];
                 buttonClasse.Click += new EventHandler(actionToDo);
             }
